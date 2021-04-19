@@ -28,6 +28,13 @@ sockets.on("connection", (socket) => {
   socket.on("disconnect", () => {
     game.removePlayer({ playerId });
   });
+
+  socket.on("move-player", (command) => {
+    command.playerId = playerId;
+    command.type = "move-player";
+
+    game.movePlayer(command);
+  });
 });
 
 server.listen(3333, () => console.log("Server listening at port 3333"));

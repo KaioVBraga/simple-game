@@ -10,6 +10,7 @@ const sockets = socketio(server);
 app.use(express.static("public"));
 
 const game = createGame();
+game.start();
 
 game.subscribe((command) => {
   console.log("> Emitting " + command.type);
@@ -37,4 +38,4 @@ sockets.on("connection", (socket) => {
   });
 });
 
-server.listen(3333, () => console.log("Server listening at port 3333"));
+server.listen(5000, () => console.log("Server listening at port 5000"));

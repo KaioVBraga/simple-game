@@ -66,6 +66,10 @@
           game.movePlayer(command);
         }
       });
+
+      socket.on("add-fruit", (fruit) => {
+        game.addFruit(fruit);
+      });
     </script>
   </body>
 </html>

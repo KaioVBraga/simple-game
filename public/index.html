@@ -15,6 +15,7 @@
         height: 400px;
       }
     </style>
+    <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
     <canvas id="screen" width="10" height="10"></canvas>
@@ -31,12 +32,19 @@
       const keyboardListener = createKeyboardListener();
       keyboardListener.subscribe(game.movePlayer);
 
-      game.addPlayer({ playerId: "player1", playerX: 1, playerY: 0 });
-      game.addPlayer({ playerId: "player2", playerX: 2, playerY: 2 });
-      game.addPlayer({ playerId: "player3", playerX: 3, playerY: 0 });
-      game.addFruit({ fruitId: "fruit1", fruitX: 8, fruitY: 3 });
-
       renderScreen(context, game, requestAnimationFrame);
+
+      const socket = io();
+
+      socket.on("connect", () => {
+        const playerId = socket.id;
+
+        console.log(`Client conectado com o id ${playerId}`);
+      });
+
+      socket.on("setup", (state) => {
+        game.state = state;
+      });
     </script>
   </body>
 </html>

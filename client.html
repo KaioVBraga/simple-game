@@ -18,181 +18,25 @@
   </head>
   <body>
     <canvas id="screen" width="10" height="10"></canvas>
-    <script>
+    <script type="module">
+      import createKeyboardListener from "./keyboard-listener.js";
+      import createGame from "./game.js";
+      import renderScreen from "./render-screen.js";
+
       const screen = document.getElementById("screen");
       const context = screen.getContext("2d");
 
       const currentId = "player1";
-
-      function createGame() {
-        const state = {
-          players: {},
-          fruits: {},
-        };
-
-        function addPlayer(command) {
-          const { playerId, playerX: x, playerY: y } = command;
-
-          state.players[playerId] = { x, y };
-        }
-
-        function removePlayer(command) {
-          const { playerId } = command;
-
-          delete state.players[playerId];
-        }
-
-        function addFruit(command) {
-          const { fruitId, fruitX: x, fruitY: y } = command;
-
-          state.fruits[fruitId] = { x, y };
-        }
-
-        function removeFruit(command) {
-          const { fruitId } = command;
-
-          delete state.fruits[fruitId];
-        }
-
-        function movePlayer(command) {
-          const moves = {
-            ArrowUp(player) {
-              if (player.y > 0) {
-                player.y -= 1;
-              }
-
-              return "up";
-            },
-            ArrowDown(player) {
-              if (player.y < screen.height - 1) {
-                player.y += 1;
-              }
-
-              return "down";
-            },
-            ArrowLeft(player) {
-              if (player.x > 0) {
-                player.x -= 1;
-              }
-
-              return "left";
-            },
-            ArrowRight(player) {
-              if (player.x < screen.width - 1) {
-                player.x += 1;
-              }
-
-              return "right";
-            },
-          };
-
-          const moveFunction = moves[command.keyPressed];
-
-          if (!moveFunction) {
-            return;
-          }
-
-          const player = state.players[command.playerId];
-
-          if (!player) {
-            return;
-          }
-
-          moveFunction(player);
-          checkForFruitCollision(command.playerId);
-
-          console.log(`Moving ${command.playerId} width ${command.keyPressed}`);
-        }
-
-        function checkForFruitCollision(playerId) {
-          const { players, fruits } = state;
-
-          const player = players[playerId];
-
-          Object.keys(fruits).map((fruitId) => {
-            const fruit = fruits[fruitId];
-
-            console.log(
-              `Checking collision between player ${playerId} and fruit ${fruitId}`
-            );
-
-            if (player.x === fruit.x && player.y === fruit.y) {
-              removeFruit({ fruitId });
-            }
-          });
-        }
-
-        return {
-          checkForFruitCollision,
-          addFruit,
-          removeFruit,
-          addPlayer,
-          removePlayer,
-          movePlayer,
-          state,
-        };
-      }
-
       const game = createGame();
       const keyboardListener = createKeyboardListener();
       keyboardListener.subscribe(game.movePlayer);
+
       game.addPlayer({ playerId: "player1", playerX: 1, playerY: 0 });
       game.addPlayer({ playerId: "player2", playerX: 2, playerY: 2 });
       game.addPlayer({ playerId: "player3", playerX: 3, playerY: 0 });
       game.addFruit({ fruitId: "fruit1", fruitX: 8, fruitY: 3 });
 
-      function createKeyboardListener() {
-        const state = {
-          observers: [],
-        };
-
-        function subscribe(observerFunction) {
-          state.observers.push(observerFunction);
-        }
-
-        function notifyAll(command) {
-          console.log(`Notifying ${state.observers.length} observers`);
-
-          state.observers.map((observerFunction) => {
-            observerFunction(command);
-          });
-        }
-
-        document.addEventListener("keydown", handleKeydown);
-
-        function handleKeydown(e) {
-          const keyPressed = e.key;
-
-          const command = {
-            playerId: "player1",
-            keyPressed,
-          };
-
-          notifyAll(command);
-        }
-
-        return {
-          subscribe,
-        };
-      }
-
-      renderScreen();
-
-      function renderScreen() {
-        context.clearRect(0, 0, 10, 10);
-
-        Object.values(game.state.players).map((player) => {
-          context.fillStyle = "black";
-          context.fillRect(player.x, player.y, 1, 1);
-        });
-
-        Object.values(game.state.fruits).map((fruit) => {
-          context.fillStyle = "green";
-          context.fillRect(fruit.x, fruit.y, 1, 1);
-        });
-
-        requestAnimationFrame(renderScreen);
-      }
+      renderScreen(context, game, requestAnimationFrame);
     </script>
   </body>
 </html>

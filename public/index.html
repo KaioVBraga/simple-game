@@ -43,7 +43,15 @@
       });
 
       socket.on("setup", (state) => {
-        game.state = state;
+        game.setState(state);
+      });
+
+      socket.on("add-player", (player) => {
+        game.addPlayer(player);
+      });
+
+      socket.on("remove-player", (player) => {
+        game.removePlayer(player);
       });
     </script>
   </body>

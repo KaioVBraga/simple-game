@@ -11,16 +11,23 @@ app.use(express.static("public"));
 
 const game = createGame();
 
-game.addFruit({ fruitId: "fruit1", fruitX: 8, fruitY: 3 });
+game.subscribe((command) => {
+  console.log("> Emitting " + command.type);
+  sockets.emit(command.type, command);
+});
 
 sockets.on("connection", (socket) => {
   const playerId = socket.id;
 
-  game.addPlayer({ playerId, playerX: 1, playerY: 0 });
+  game.addPlayer({ playerId });
 
   console.log(`Player connected on Server with ID: ${playerId}`);
 
   socket.emit("setup", game.state);
+
+  socket.on("disconnect", () => {
+    game.removePlayer({ playerId });
+  });
 });
 
 server.listen(3333, () => console.log("Server listening at port 3333"));

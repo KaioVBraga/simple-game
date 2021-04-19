@@ -24,82 +24,131 @@
 
       const currentId = "player1";
 
-      const game = {
-        players: {
-          player1: {
-            x: 1,
-            y: 1,
+      function createGame() {
+        const state = {
+          players: {
+            player1: {
+              x: 1,
+              y: 1,
+            },
+            player2: {
+              x: 9,
+              y: 9,
+            },
           },
-          player2: {
-            x: 9,
-            y: 9,
+          fruits: {
+            fruit1: {
+              x: 3,
+              y: 1,
+            },
           },
-        },
-        fruits: {
-          fruit1: {
-            x: 3,
-            y: 1,
-          },
-        },
-      };
+        };
+
+        function movePlayer(command) {
+          const player = state.players[command.playerId];
+
+          const moves = {
+            ArrowUp: () => {
+              if (player.y > 0) {
+                player.y -= 1;
+              }
+
+              return "up";
+            },
+            ArrowDown: () => {
+              if (player.y < screen.height - 1) {
+                player.y += 1;
+              }
+
+              return "down";
+            },
+            ArrowLeft: () => {
+              if (player.x > 0) {
+                player.x -= 1;
+              }
+
+              return "left";
+            },
+            ArrowRight: () => {
+              if (player.x < screen.width - 1) {
+                player.x += 1;
+              }
+
+              return "right";
+            },
+          };
+
+          if (!moves[command.keyPressed]) {
+            return;
+          }
+
+          moves[command.keyPressed]();
+
+          console.log(`Moving ${command.playerId} width ${command.keyPressed}`);
+        }
+
+        return {
+          movePlayer,
+          state,
+        };
+      }
+
+      const game = createGame();
+      const keyboardListener = createKeyboardListener();
+
+      keyboardListener.subscribe(game.movePlayer);
+
+      function createKeyboardListener() {
+        const state = {
+          observers: [],
+        };
+
+        function subscribe(observerFunction) {
+          state.observers.push(observerFunction);
+        }
+
+        function notifyAll(command) {
+          console.log(`Notifying ${state.observers.length} observers`);
+
+          state.observers.map((observerFunction) => {
+            observerFunction(command);
+          });
+        }
+
+        document.addEventListener("keydown", handleKeydown);
+
+        function handleKeydown(e) {
+          const keyPressed = e.key;
+
+          const command = {
+            playerId: "player1",
+            keyPressed,
+          };
+
+          notifyAll(command);
+        }
+
+        return {
+          subscribe,
+        };
+      }
 
       renderScreen();
 
       function renderScreen() {
         context.clearRect(0, 0, 10, 10);
 
-        Object.values(game.players).map((player) => {
+        Object.values(game.state.players).map((player) => {
           context.fillStyle = "black";
           context.fillRect(player.x, player.y, 1, 1);
         });
 
-        Object.values(game.fruits).map((fruit) => {
+        Object.values(game.state.fruits).map((fruit) => {
           context.fillStyle = "green";
           context.fillRect(fruit.x, fruit.y, 1, 1);
         });
 
         requestAnimationFrame(renderScreen);
-      }
-
-      document.addEventListener("keydown", handleKeydown);
-
-      function handleKeydown(e) {
-        const moves = {
-          ArrowUp: () => {
-            if (game.players[currentId].y > 0) {
-              game.players[currentId].y -= 1;
-            }
-
-            return "up";
-          },
-          ArrowDown: () => {
-            if (game.players[currentId].y < 9) {
-              game.players[currentId].y += 1;
-            }
-
-            return "down";
-          },
-          ArrowLeft: () => {
-            if (game.players[currentId].x > 0) {
-              game.players[currentId].x -= 1;
-            }
-
-            return "left";
-          },
-          ArrowRight: () => {
-            if (game.players[currentId].x < 9) {
-              game.players[currentId].x += 1;
-            }
-
-            return "right";
-          },
-        };
-
-        if (!moves[e.key]) {
-          return;
-        }
-
-        moves[e.key]();
       }
     </script>
   </body>

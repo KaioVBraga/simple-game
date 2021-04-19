@@ -86,7 +86,9 @@
             },
           };
 
-          if (!moves[command.keyPressed]) {
+          const moveFunction = moves[command.keyPressed];
+
+          if (!moveFunction) {
             return;
           }
 
@@ -96,28 +98,27 @@
             return;
           }
 
-          moves[command.keyPressed](player);
+          moveFunction(player);
+          checkForFruitCollision(command.playerId);
 
           console.log(`Moving ${command.playerId} width ${command.keyPressed}`);
         }
 
-        function checkForFruitCollision() {
+        function checkForFruitCollision(playerId) {
           const { players, fruits } = state;
 
-          Object.keys(players).map((playerId) => {
-            const player = players[playerId];
+          const player = players[playerId];
 
-            Object.keys(fruits).map((fruitId) => {
-              const fruit = fruits[fruitId];
+          Object.keys(fruits).map((fruitId) => {
+            const fruit = fruits[fruitId];
 
-              if (player.x === fruit.x && player.y === fruit.y) {
-                console.log(
-                  `Collision between player ${playerId} and fruit ${fruitId}`
-                );
+            console.log(
+              `Checking collision between player ${playerId} and fruit ${fruitId}`
+            );
 
-                removeFruit({ fruitId });
-              }
-            });
+            if (player.x === fruit.x && player.y === fruit.y) {
+              removeFruit({ fruitId });
+            }
           });
         }
 
@@ -134,8 +135,11 @@
 
       const game = createGame();
       const keyboardListener = createKeyboardListener();
-
       keyboardListener.subscribe(game.movePlayer);
+      game.addPlayer({ playerId: "player1", playerX: 1, playerY: 0 });
+      game.addPlayer({ playerId: "player2", playerX: 2, playerY: 2 });
+      game.addPlayer({ playerId: "player3", playerX: 3, playerY: 0 });
+      game.addFruit({ fruitId: "fruit1", fruitX: 8, fruitY: 3 });
 
       function createKeyboardListener() {
         const state = {
@@ -187,7 +191,6 @@
           context.fillRect(fruit.x, fruit.y, 1, 1);
         });
 
-        game.checkForFruitCollision();
         requestAnimationFrame(renderScreen);
       }
     </script>

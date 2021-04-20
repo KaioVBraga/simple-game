@@ -59,11 +59,11 @@ export default function createGame() {
   function addFruit(command) {
     const { fruitId, fruitX, fruitY } = command || {};
 
-    const id = Math.floor(Math.random() * 10000000);
+    const id = fruitId || Math.floor(Math.random() * 10000000);
     const x = fruitX || Math.floor(Math.random() * state.screen.width);
     const y = fruitY || Math.floor(Math.random() * state.screen.height);
 
-    state.fruits[fruitId] = { x, y };
+    state.fruits[id] = { x, y };
 
     notifyAll({
       type: "add-fruit",
@@ -77,6 +77,11 @@ export default function createGame() {
     const { fruitId } = command;
 
     delete state.fruits[fruitId];
+
+    notifyAll({
+      type: "remove-fruit",
+      fruitId,
+    });
   }
 
   function movePlayer(command) {
